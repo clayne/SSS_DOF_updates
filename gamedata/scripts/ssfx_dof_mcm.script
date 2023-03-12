@@ -13,6 +13,7 @@ function legacy_proc()
 		     reloading_mcm =      "reload_farblur_mcm",
 		           pda_mcm =         "pda_farblur_mcm",
 		     inventory_mcm =   "inventory_farblur_mcm",
+		        dialog_mcm =      "dialog_farblur_mcm",
 		          fdda_mcm =        "fdda_farblur_mcm",
 		looting_mutant_mcm = "loot_mutant_farblur_mcm",
 	}
@@ -56,6 +57,7 @@ function on_mcm_load()
 				{id = "reload_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.reload_farblur_mcm or 0.5},
 				{id = "pda_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.pda_farblur_mcm or 0.7},
 				{id = "inventory_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.inventory_farblur_mcm or 0.7},
+				{id = "dialog_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.dialog_farblur_mcm or 0.7},
 				{id = "fdda_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.fdda_farblur_mcm or 0.7},
 				{id = "loot_mutant_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.loot_mutant_farblur_mcm or 0.7},
 			}

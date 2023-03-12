@@ -17,6 +17,7 @@ local ssfx_wpn_dof_aim_edgeblur = 0
 local ssfx_wpn_dof_reload_far_blur = 0
 local ssfx_wpn_dof_pda_far_blur = 0
 local ssfx_wpn_dof_inventory_far_blur = 0
+local ssfx_wpn_dof_dialog_far_blur = 0
 local ssfx_wpn_dof_fdda_far_blur = 0
 local ssfx_wpn_dof_loot_mutant_far_blur = 0
 
@@ -115,19 +116,25 @@ end
 
 local function GUI_on_show(name)
 	
-	if ssfx_wpn_dof_loot_mutant_far_blur == 0.0 then return end
-	
 	if name == "UIMutantLoot" then -- Remove time animation end if loot UIMutantLoot GUI shows
+		if ssfx_wpn_dof_loot_mutant_far_blur == 0.0 then return end
 		RemoveTimeEvent("ssfx_endanim", "ssfx_item_anim_stop")
 		
 		-- Even without the FDDA animation, we want DOF with the UI
 		ssfx_itm_state = 2
 		ssfx_far_blur(ssfx_wpn_dof_inventory_far_blur, 0, true)
+	elseif name == "Dialog" then
+		if ssfx_wpn_dof_dialog_far_blur == 0.0 then return end
+
+		-- XXX: this needs some kind of offset to place the far blur further back
+		ssfx_far_blur(ssfx_wpn_dof_dialog_far_blur, 0, true)
 	end
 end
 
 local function GUI_on_hide(name)
 	if name == "UIMutantLoot" then -- Remove DOF if UIMutantLoot GUI hide
+		ssfx_item_anim_stop()
+	elseif name == "Dialog" then
 		ssfx_item_anim_stop()
 	end
 end
@@ -478,6 +485,7 @@ function on_option_change()
 	ssfx_wpn_dof_reload_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "reload_farblur", ssfx_weapons_dof_settings)
 	ssfx_wpn_dof_pda_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "pda_farblur", ssfx_weapons_dof_settings)
 	ssfx_wpn_dof_inventory_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "inventory_farblur", ssfx_weapons_dof_settings)
+	ssfx_wpn_dof_dialog_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "dialog_farblur", ssfx_weapons_dof_settings)
 	ssfx_wpn_dof_fdda_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fdda_farblur", ssfx_weapons_dof_settings)
 	ssfx_wpn_dof_loot_mutant_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "loot_mutant_farblur", ssfx_weapons_dof_settings)
 

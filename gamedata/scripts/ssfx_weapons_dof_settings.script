@@ -22,6 +22,7 @@ ssfx_default_settings = {
 	["reload_far_blur"]	= 0.5,	-- Reload far blur ( 0 = Disable )
 	["pda_far_blur"]	= 0.7,	-- PDA far blur ( 0 = Disable )
 	["inventory_far_blur"]	= 0.7,	-- Inventory far blur ( 0 = Disable )
+	["dialog_far_blur"]	= 0.7,	-- Dialog far blur ( 0 = Disable )
 	["fdda_far_blur"]	= 0.7,	-- Items (FDDA) far blur ( 0 = Disable )
 	["loot_mutant_far_blur"]= 0.7,	-- Looting mutants far blur ( 0 = Disable )
 
@@ -29,6 +30,7 @@ ssfx_default_settings = {
 	["reloading"]		= true,	-- DOF when reloading
 	["pda"]				= true,	-- DOF when using PDA
 	["inventory"]		= true,	-- DOF when using Inventory
+	["dialog"]		= true,	-- DOF when using Dialog
 	["fdda"]			= true,	-- DOF when using Items ( FDDA addon )
 	["looting_mutant"]	= true,	-- DOF when looting mutants
 }

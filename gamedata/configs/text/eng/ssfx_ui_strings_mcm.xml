@@ -80,6 +80,10 @@
 		<text>Inventory far blur ( 0 = Disable )</text>
 	</string>
 
+	<string id="ui_mcm_ssfx_module_wpn_dof_dialog_farblur_mcm">
+		<text>Dialog far blur ( 0 = Disable )</text>
+	</string>
+
 	<string id="ui_mcm_ssfx_module_wpn_dof_fdda_farblur_mcm">
 		<text>Item animations (FDDA) far blur ( 0 = Disable )</text>
 	</string>
@@ -96,11 +100,15 @@
 	<string id="ui_mcm_ssfx_module_wpn_dof_pda_mcm">
 		<text>DOF when using PDA</text>
 	</string>
-	
+
 	<string id="ui_mcm_ssfx_module_wpn_dof_inventory_mcm">
 		<text>DOF when using Inventory</text>
 	</string>
-	
+
+	<string id="ui_mcm_ssfx_module_wpn_dof_dialog_mcm">
+		<text>DOF when using Dialog</text>
+	</string>
+
 	<string id="ui_mcm_ssfx_module_wpn_dof_fdda_mcm">
 		<text>DOF when using Items ( FDDA )</text>
 	</string>
