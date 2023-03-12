@@ -3,19 +3,49 @@
 -- @ Author: https://www.moddb.com/members/ascii1457
 -- @ Mod: https://www.moddb.com/mods/stalker-anomaly/addons/screen-space-shaders
 
+function legacy_proc()
+	local override = {}
+	local path_base = "ssfx_module/wpn_dof"
+
+	-- legacy boolean options which were explicitly set to false should
+	-- use a default of 0.0 (disabled) rather than the new default
+	legacy_xtab  = {
+		     reloading_mcm =      "reload_farblur_mcm",
+		           pda_mcm =         "pda_farblur_mcm",
+		     inventory_mcm =   "inventory_farblur_mcm",
+		          fdda_mcm =        "fdda_farblur_mcm",
+		looting_mutant_mcm = "loot_mutant_farblur_mcm",
+	}
+
+	for old,new in pairs(legacy_xtab) do
+		local path = path_base .. "/" .. old
+		local t = axr_main.config:r_value("mcm", path, 1)
+
+		-- check for false as that means it was explicitly disabled
+		override[new] = (t == false) and 0.0 or nil
+
+		-- now remove the old entry entirely
+		if t ~= nil then axr_main.config:remove_line("mcm", path) end
+	end
+
+	return override
+end
+
 function on_mcm_load()
+	-- certain defaults need special handling for backwards compatibility
+	dfl_override = legacy_proc()
 
 	op = { id= "wpn_dof", sh=true, text="ui_mcm_ssfx_module_wpn_dof", gr ={
 
 				{id = "title",type= "slide",link= "ui_options_slider_player",text="ui_mcm_ssfx_module_wpn_dof_title",size= {512,50},spacing= 20 },
-					
+
 				{id = "aim_fadestart_mcm", type = "track", val = 2, min=0.0,max=0.3,step=0.01, def = 0.1},
 				{id = "aim_fadelen_mcm", type = "track", val = 2, min=0.0,max=1.3,step=0.01, def = 0.25},
 				{id = "aim_blur_mcm", type = "track", val = 2, min=0.0,max=2.0,step=0.05, def = 1.6},
 				{id = "aim_edgeblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.1, def = 1.0},
 
 				{ id = "line", type = "line" },
-			
+
 				{id = "fadestart_mcm", type = "track", val = 2, min=0.0,max=0.3,step=0.01, def = 0.15},
 				{id = "fadelen_mcm", type = "track", val = 2, min=0.0,max=1.3,step=0.01, def = 0.25},
 				{id = "blur_mcm", type = "track", val = 2, min=0.0,max=2.0,step=0.05, def = 1.1},
@@ -23,11 +53,11 @@ function on_mcm_load()
 
 				{ id = "line", type = "line" },
 
-				{id = "reloading_mcm", type = "check", val = 1, def=true},
-				{id = "pda_mcm", type = "check", val = 1, def=true},
-				{id = "inventory_mcm", type = "check", val = 1, def=true},
-				{id = "fdda_mcm", type = "check", val = 1, def=true},
-				{id = "looting_mutant_mcm", type = "check", val = 1, def=true},
+				{id = "reload_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.reload_farblur_mcm or 0.5},
+				{id = "pda_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.pda_farblur_mcm or 0.7},
+				{id = "inventory_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.inventory_farblur_mcm or 0.7},
+				{id = "fdda_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.fdda_farblur_mcm or 0.7},
+				{id = "loot_mutant_farblur_mcm", type = "track", val = 2, min=0.0,max=1.0,step=0.05, def = dfl_override.loot_mutant_farblur_mcm or 0.7},
 			}
 		}
 
