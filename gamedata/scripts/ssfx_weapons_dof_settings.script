@@ -17,7 +17,14 @@ ssfx_default_settings = {
 	["aim_fadelen"]		= 0.25,	-- Out of focus fade length
 	["aim_blur"]		= 1.6,	-- Blur intensity ( 0 = Disable )
 	["aim_edgeblur"]	= 1.0,	-- Peripheral Blur ( 0 = Disable )
-	
+
+	-- [ ACTIONS DOF ]
+	["reload_far_blur"]	= 0.5,	-- Reload far blur ( 0 = Disable )
+	["pda_far_blur"]	= 0.7,	-- PDA far blur ( 0 = Disable )
+	["inventory_far_blur"]	= 0.7,	-- Inventory far blur ( 0 = Disable )
+	["fdda_far_blur"]	= 0.7,	-- Items (FDDA) far blur ( 0 = Disable )
+	["loot_mutant_far_blur"]= 0.7,	-- Looting mutants far blur ( 0 = Disable )
+
 	-- [ ACTIONS ]
 	["reloading"]		= true,	-- DOF when reloading
 	["pda"]				= true,	-- DOF when using PDA

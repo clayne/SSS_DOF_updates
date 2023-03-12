@@ -14,11 +14,11 @@ local ssfx_wpn_dof_aim_maxlen = 0
 local ssfx_wpn_dof_aim_blur = 0
 local ssfx_wpn_dof_aim_edgeblur = 0
 
-local ssfx_wpn_dof_reload = true
-local ssfx_wpn_dof_pda = true
-local ssfx_wpn_dof_inventory = true
-local ssfx_wpn_dof_FDDA = true
-local ssfx_wpn_dof_loot_mutant = true
+local ssfx_wpn_dof_reload_far_blur = 0
+local ssfx_wpn_dof_pda_far_blur = 0
+local ssfx_wpn_dof_inventory_far_blur = 0
+local ssfx_wpn_dof_fdda_far_blur = 0
+local ssfx_wpn_dof_loot_mutant_far_blur = 0
 
 -- Weapons that have kind "pistol" but aren't pistols
 local ssfx_not_pistol = {
@@ -27,8 +27,9 @@ local ssfx_not_pistol = {
 	wpn_aek919k = true,
 }
 
-local ssfx_wpn_dof_blur_current = 0.0
-local ssfx_wpn_dof_blur_to = 0.0
+local ssfx_wpn_dof_far_blur_ignore_length = false
+local ssfx_wpn_dof_far_blur_current = 0.0
+local ssfx_wpn_dof_far_blur_to = 0.0
 
 local ssfx_reloading = 0
 local ssfx_reloadtime = 0
@@ -78,7 +79,7 @@ end
 local function ssfx_item_anim_stop()
 	
 	ssfx_itm_state = 0
-	ssfx_far_blur(0, 0)
+	ssfx_far_blur(0, 0, false)
 	return true
 	
 end
@@ -89,8 +90,8 @@ function itms_manager.actor_on_item_before_use(obj,flags)
 
 	original_function(obj,flags)
 	
-	if ssfx_wpn_dof_FDDA == false then 
-		return 
+	if ssfx_wpn_dof_fdda_far_blur == 0.0 then
+		return
 	end
 	
 	-- Item passes the utilization checks? only_movekeys is only true if check is ok ( FDDA reset the flags.ret_value )
@@ -103,7 +104,7 @@ end
 -- Loot monsters with FFDA
 local function ssfx_monster_on_actor_use(obj)
 
-	if (ssfx_wpn_dof_loot_mutant == false) then
+	if (ssfx_wpn_dof_loot_mutant_far_blur == 0.0) then
 		return
 	end
 	
@@ -114,14 +115,14 @@ end
 
 local function GUI_on_show(name)
 	
-	if ssfx_wpn_dof_loot_mutant == false then return end
+	if ssfx_wpn_dof_loot_mutant_far_blur == 0.0 then return end
 	
 	if name == "UIMutantLoot" then -- Remove time animation end if loot UIMutantLoot GUI shows
 		RemoveTimeEvent("ssfx_endanim", "ssfx_item_anim_stop")
 		
-		-- Even without the FFDA animation, we want DOF with the UI
+		-- Even without the FDDA animation, we want DOF with the UI
 		ssfx_itm_state = 2
-		ssfx_far_blur(1, 0)
+		ssfx_far_blur(ssfx_wpn_dof_inventory_far_blur, 0, true)
 	end
 end
 
@@ -151,7 +152,7 @@ end
 -- Check PDA states
 local function ssfx_PDA_state()
 
-	if ssfx_pda_state == 0 or ssfx_wpn_dof_pda == false then 
+	if ssfx_pda_state == 0 or ssfx_wpn_dof_pda_far_blur == 0.0 then
 		return
 	end
 	
@@ -171,11 +172,12 @@ local function ssfx_PDA_state()
 		
 		-- If Zoom, Enable DOF
 		if ssfx_pda_zoom == 1 then 
-			ssfx_far_blur(1, 0)
+			ssfx_far_blur(ssfx_wpn_dof_pda_far_blur, 0, true)
 		else
+			-- XXX: should this be here?
 			ssfx_wpn_dof_minlen = 0
 			ssfx_wpn_dof_maxlen = 0
-			ssfx_far_blur(0, 0)
+			ssfx_far_blur(0, 0, false)
 		end
 	end
 	
@@ -183,9 +185,10 @@ end
 
 -- Function to end the PDA state
 local function ssfx_PDA_reset()
+	-- XXX: should this be here?
 	ssfx_wpn_dof_minlen = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fadestart", ssfx_weapons_dof_settings)
 	ssfx_wpn_dof_maxlen = ssfx_wpn_dof_minlen + ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fadelen", ssfx_weapons_dof_settings)
-	ssfx_far_blur(0, 0)
+	ssfx_far_blur(0, 0, false)
 	ssfx_pda_state = 0
 	ssfx_pda_zoom = 0
 end
@@ -218,15 +221,17 @@ local function actor_on_update()
 			
 			-- Get the animation time
 			local tm = ssfx_items_anim:r_float_ex(ssfx_itm_in_use, "tm")
-			
+			local far_blur = ssfx_wpn_dof_fdda_far_blur
+
 			if ssfx_itm_in_use == "mutant_looting" then
 				tm = 4500
+				far_blur = ssfx_wpn_dof_loot_mutant_far_blur
 			end
 			
 			if tm > 0 then
 			
 				-- Initialize far blur
-				ssfx_far_blur(1, 0)
+				ssfx_far_blur(far_blur, 0, true)
 				
 				-- Millisecs to secs
 				anim_tm = tm * 0.001
@@ -246,15 +251,15 @@ local function actor_on_update()
 	end
 	
 	-- Inventory stuff ( "Inventory" = 1 -- "trade" = 2 -- "repair" = 3 -- "loot" = 4 )
-	if actor_menu.last_mode == 1 and ssfx_wpn_dof_inventory then
+	if actor_menu.last_mode == 1 and ssfx_wpn_dof_inventory_far_blur > 0 then
 		if (ssfx_inv_state == 0) then
 			ssfx_inv_state = 1
-			ssfx_far_blur(1, 0)
+			ssfx_far_blur(ssfx_wpn_dof_inventory_far_blur, 0, true)
 		end
 	else
 		if (ssfx_inv_state == 1) then
 			ssfx_inv_state = 0
-			ssfx_far_blur(0, ssfx_reloading + ssfx_itm_state)
+			ssfx_far_blur(0, ssfx_reloading + ssfx_itm_state, false)
 		end
 	end
 	
@@ -274,7 +279,7 @@ local function actor_on_update()
 	end
 	
 	-- Reload stuff ( "Idle" = 0 -- "Raise" = 1 -- "Lower" = 2 -- "Reload" = 7 )
-	if is_weapon and ssfx_wpn_dof_reload then
+	if is_weapon and ssfx_wpn_dof_reload_far_blur > 0 then
 		
 		-- Reload states
 		if ssfx_reloading == 0 then -- Idle
@@ -287,7 +292,7 @@ local function actor_on_update()
 				ssfx_wpn_one_shot = (ini_sys:r_string_ex(sec, "tri_state_reload") == "on") or (ini_sys:r_string_ex(sec, "class") == "WP_BM16")
 	
 				ssfx_reloading = 1 -- Reloading
-				ssfx_far_blur(1, 0)
+				ssfx_far_blur(ssfx_wpn_dof_reload_far_blur, 0, true)
 				ssfx_reloadtime = tg
 				
 				-- Check if we know the reload animation length, omit if ssfx_wpn_one_shot true
@@ -321,7 +326,7 @@ local function actor_on_update()
 			
 				-- End reload if reload time
 				if (tg - ssfx_reloadtime) > ssfx_reloadforce_end then
-					ssfx_far_blur(0, ssfx_inv_state)
+					ssfx_far_blur(0, ssfx_inv_state, false)
 					ssfx_reloading = 2 -- Wait animation to end
 				end
 			else
@@ -331,7 +336,7 @@ local function actor_on_update()
 				-- End reload if current ammo == mag size
 				if itm:get_ammo_in_magazine() == ini_sys:r_u32(sec, "ammo_mag_size") then
 
-					ssfx_far_blur(0, ssfx_inv_state)
+					ssfx_far_blur(0, ssfx_inv_state, false)
 					ssfx_reloading = 2 -- Wait animation to end
 					
 					-- Save time if not ssfx_wpn_one_shot
@@ -345,7 +350,7 @@ local function actor_on_update()
 		
 		-- Wait for the end of the reloading animation or any other state.
 		if itm:get_state() ~= 7 and ssfx_reloading > 0 then
-			ssfx_far_blur(0, ssfx_inv_state)
+			ssfx_far_blur(0, ssfx_inv_state, false)
 			ssfx_reloading = 0
 		end
 	end
@@ -353,7 +358,7 @@ local function actor_on_update()
 	-- If weapon or PDA is dropped
 	if itm == nil then
 		if ssfx_reloading > 0 then
-			ssfx_far_blur(0, ssfx_inv_state)
+			ssfx_far_blur(0, ssfx_inv_state, false)
 			ssfx_reloading = 0
 		end
 		if ssfx_pda_state > 0 then
@@ -362,35 +367,43 @@ local function actor_on_update()
 	end
 end
 
-local function ssfx_change_blur()
+local function ssfx_change_far_blur()
 	
 	-- Smooth to target
-	local smoothed = ssfx_diminish()
-	
-	if (ssfx_wpn_dof_blur_to == 1) then
-		ssfx_set_dof(0, 0, smoothed, ssfx_wpn_dof_blur)
-	else
-		ssfx_set_dof(ssfx_wpn_dof_minlen, ssfx_wpn_dof_maxlen, smoothed, ssfx_wpn_dof_blur)
+	local far_blur_smoothed = ssfx_diminish_far_blur()
+	local minlen = ssfx_wpn_dof_minlen
+	local maxlen = ssfx_wpn_dof_maxlen
+
+	if (ssfx_wpn_dof_far_blur_ignore_length == true) then
+		minlen = 0
+		maxlen = 0
 	end
-	
-	if (smoothed == ssfx_wpn_dof_blur_to) then
-		ssfx_stop_blur()
+
+	ssfx_set_dof(minlen, maxlen, far_blur_smoothed, ssfx_wpn_dof_blur)
+
+	if (far_blur_smoothed == ssfx_wpn_dof_far_blur_to) then
+		ssfx_stop_far_blur()
 	end
 end
 
-function ssfx_far_blur(to_val, checkvar)
+function ssfx_far_blur(to_val, checkvar, ignore_length)
 	
 	if checkvar > 0 then return end
 	
-	if (ssfx_wpn_dof_blur_to ~= to_val) then
-		ssfx_stop_blur()
-		ssfx_wpn_dof_blur_to = to_val
-		RegisterScriptCallback("actor_on_update", ssfx_change_blur)
+	if (ssfx_wpn_dof_far_blur_to ~= to_val) then
+		ssfx_stop_far_blur()
+		ssfx_wpn_dof_far_blur_to = to_val
+		ssfx_wpn_dor_far_blur_ignore_length = ignore_length
+		ssfx_start_far_blur()
 	end
 end
 
-function ssfx_stop_blur()
-	UnregisterScriptCallback("actor_on_update", ssfx_change_blur)
+function ssfx_start_far_blur()
+	RegisterScriptCallback("actor_on_update", ssfx_change_far_blur)
+end
+
+function ssfx_stop_far_blur()
+	UnregisterScriptCallback("actor_on_update", ssfx_change_far_blur)
 end
 
 function ssfx_check_item()
@@ -407,28 +420,28 @@ function ssfx_check_item()
 	return false
 end
 
-function ssfx_diminish()
+function ssfx_diminish_far_blur()
 	
 	-- Frame independent smoothing
 	local smoothing = math.min(0.1 * device().time_delta / 20, 0.19)
 	
 	-- Let's go!
-	if (ssfx_wpn_dof_blur_current < ssfx_wpn_dof_blur_to) then
-		ssfx_wpn_dof_blur_current = ssfx_wpn_dof_blur_current + smoothing
+	if (ssfx_wpn_dof_far_blur_current < ssfx_wpn_dof_far_blur_to) then
+		ssfx_wpn_dof_far_blur_current = ssfx_wpn_dof_far_blur_current + smoothing
 	else
-		ssfx_wpn_dof_blur_current = ssfx_wpn_dof_blur_current - smoothing
+		ssfx_wpn_dof_far_blur_current = ssfx_wpn_dof_far_blur_current - smoothing
 	end
 	
-	if math.abs(ssfx_wpn_dof_blur_current - ssfx_wpn_dof_blur_to) <= 0.1 then
-		ssfx_wpn_dof_blur_current = ssfx_wpn_dof_blur_to
+	if math.abs(ssfx_wpn_dof_far_blur_current - ssfx_wpn_dof_far_blur_to) <= 0.1 then
+		ssfx_wpn_dof_far_blur_current = ssfx_wpn_dof_far_blur_to
 	end
 	
-	return ssfx_wpn_dof_blur_current
+	return ssfx_wpn_dof_far_blur_current
 end
 
-function ssfx_set_dof(var1, var2, var3, var4)
-	ssfx_wpn_dof_blur_current = var3
-	get_console():execute("ssfx_wpn_dof_1 (" .. var1 .. "," .. var2 .. "," .. var3 .. "," .. var4 .. ")")
+function ssfx_set_dof(minlen, maxlen, blur_far, blur)
+	ssfx_wpn_dof_far_blur_current = blur_far
+	get_console():execute("ssfx_wpn_dof_1 (" .. minlen .. "," .. maxlen .. "," .. blur_far .. "," .. blur .. ")")
 end
 
 function actor_on_first_update()
@@ -462,12 +475,12 @@ function on_option_change()
 	ssfx_wpn_dof_aim_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "aim_blur", ssfx_weapons_dof_settings)
 	ssfx_wpn_dof_aim_edgeblur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "aim_edgeblur", ssfx_weapons_dof_settings) / 2
 	
-	ssfx_wpn_dof_reload = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "reloading", ssfx_weapons_dof_settings)
-	ssfx_wpn_dof_pda = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "pda", ssfx_weapons_dof_settings)
-	ssfx_wpn_dof_inventory = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "inventory", ssfx_weapons_dof_settings)
-	ssfx_wpn_dof_FDDA = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fdda", ssfx_weapons_dof_settings)
-	ssfx_wpn_dof_loot_mutant =  ssfx_001_mcm.ssfx_get_setting("wpn_dof", "looting_mutant", ssfx_weapons_dof_settings)
-	
+	ssfx_wpn_dof_reload_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "reload_farblur", ssfx_weapons_dof_settings)
+	ssfx_wpn_dof_pda_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "pda_farblur", ssfx_weapons_dof_settings)
+	ssfx_wpn_dof_inventory_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "inventory_farblur", ssfx_weapons_dof_settings)
+	ssfx_wpn_dof_fdda_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fdda_farblur", ssfx_weapons_dof_settings)
+	ssfx_wpn_dof_loot_mutant_far_blur = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "loot_mutant_farblur", ssfx_weapons_dof_settings)
+
 	-- Apply settings to current state
 	
 	-- Weapon
@@ -482,35 +495,31 @@ function on_option_change()
 	end
 	
 	-- Reload
-	if ssfx_reloading > 0 and ssfx_wpn_dof_reload ~= true then
-		ssfx_far_blur(0, ssfx_inv_state)
+	if ssfx_reloading > 0 and ssfx_wpn_dof_reload_far_blur == 0.0 then
+		ssfx_far_blur(0, ssfx_inv_state, false)
 		ssfx_reloading = 0
 	end
 	
 	-- Inventory
-	if actor_menu.last_mode == 1 and ssfx_wpn_dof_inventory ~= true then
+	if actor_menu.last_mode == 1 and ssfx_wpn_dof_inventory_far_blur == 0.0 then
 		ssfx_inv_state = 0
-		ssfx_far_blur(0, ssfx_reloading)
+		ssfx_far_blur(0, ssfx_reloading, false)
 	end
 
-	-- FDAA or Looting mutant
-	if enhanced_animations == nil then
-		ssfx_wpn_dof_FDDA = false
-	else
-		if enhanced_animations.enable_animations == false then
-			ssfx_wpn_dof_FDDA = false
-		end
+	-- FDDA or Looting mutant
+	if enhanced_animations == nil or enhanced_animations.enable_animations == false then
+		ssfx_wpn_dof_fdda_far_blur = 0.0
 	end
 	
-	if ssfx_wpn_dof_FDDA == false or ssfx_wpn_dof_loot_mutant == false then
+	if ssfx_wpn_dof_fdda_far_blur == 0.0 or ssfx_wpn_dof_loot_mutant_far_blur == 0.0 then
 		if ssfx_itm_state > 0 then
 			ssfx_itm_state = 0
-			ssfx_far_blur(0, ssfx_reloading)
+			ssfx_far_blur(0, ssfx_reloading, false)
 		end
 	end
 	
 	-- PDA Zoom
-	if ssfx_wpn_dof_pda then
+	if ssfx_wpn_dof_pda_far_blur > 0 then
 		RegisterScriptCallback("on_key_press", ssfx_on_key_press)
 	else
 		UnregisterScriptCallback("on_key_press", ssfx_on_key_press)
