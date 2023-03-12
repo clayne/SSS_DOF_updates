@@ -53,24 +53,24 @@
 	</string>
 
 
-	<string id="ui_mcm_ssfx_module_wpn_dof_reloading_mcm">
-		<text>DOF when Reloading</text>
-	</string>
-	
-	<string id="ui_mcm_ssfx_module_wpn_dof_pda_mcm">
-		<text>DOF when using PDA</text>
-	</string>
-	
-	<string id="ui_mcm_ssfx_module_wpn_dof_inventory_mcm">
-		<text>DOF when using Inventory</text>
-	</string>
-	
-	<string id="ui_mcm_ssfx_module_wpn_dof_fdda_mcm">
-		<text>DOF when using Items ( FDDA )</text>
+	<string id="ui_mcm_ssfx_module_wpn_dof_reload_farblur_mcm">
+		<text>Reloading far blur ( 0 = Disable )</text>
 	</string>
 
-	<string id="ui_mcm_ssfx_module_wpn_dof_looting_mutant_mcm">
-		<text>DOF when looting mutants</text>
+	<string id="ui_mcm_ssfx_module_wpn_dof_pda_farblur_mcm">
+		<text>PDA far blur ( 0 = Disable )</text>
 	</string>
-	
+
+	<string id="ui_mcm_ssfx_module_wpn_dof_inventory_farblur_mcm">
+		<text>Inventory far blur ( 0 = Disable )</text>
+	</string>
+
+	<string id="ui_mcm_ssfx_module_wpn_dof_fdda_farblur_mcm">
+		<text>Item animations (FDDA) far blur ( 0 = Disable )</text>
+	</string>
+
+	<string id="ui_mcm_ssfx_module_wpn_dof_loot_mutant_farblur_mcm">
+		<text>Looting mutants far blur ( 0 = Disable )</text>
+	</string>
+
 </string_table>
