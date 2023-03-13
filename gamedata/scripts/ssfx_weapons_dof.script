@@ -140,12 +140,10 @@ local function ssfx_on_key_press(dik)
 	local bind = dik_to_bind(dik)
 	local kb = key_bindings
 
-	if bind == kb.kWPN_ZOOM or bind == kb.kWPN_FIRE or bind == kb.kWPN_RELOAD then
-		if bind == kb.kWPN_RELOAD then
-			ssfx_pda_zoom = 1 - ssfx_pda_zoom
-		else
-			ssfx_pda_zoom = 1
-		end
+	if bind == kb.kWPN_ZOOM or bind == kb.kWPN_FIRE then
+		ssfx_pda_zoom = 1
+	elseif bind == kb.kWPN_RELOAD then
+		ssfx_pda_zoom = 1 - ssfx_pda_zoom -- toggle
 	end
 end
 
@@ -165,8 +163,8 @@ local function ssfx_PDA_state()
 	if ssfx_pda_state == 1 then
 		-- Wait for 100% ready
 		itm = db.actor:active_item()
-		if itm then
-			if itm:get_state() == 0 then ssfx_pda_state = 2 end
+		if itm and itm:get_state() == 0 then
+			ssfx_pda_state = 2
 		end
 	elseif ssfx_pda_state == 2 then
 		
@@ -174,10 +172,7 @@ local function ssfx_PDA_state()
 		if ssfx_pda_zoom == 1 then 
 			ssfx_far_blur(ssfx_wpn_dof_pda_far_blur, 0, true)
 		else
-			-- XXX: should this be here?
-			ssfx_wpn_dof_minlen = 0
-			ssfx_wpn_dof_maxlen = 0
-			ssfx_far_blur(0, 0, false)
+			ssfx_far_blur(0, ssfx_inv_state, false)
 		end
 	end
 	
@@ -185,10 +180,7 @@ end
 
 -- Function to end the PDA state
 local function ssfx_PDA_reset()
-	-- XXX: should this be here?
-	ssfx_wpn_dof_minlen = ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fadestart", ssfx_weapons_dof_settings)
-	ssfx_wpn_dof_maxlen = ssfx_wpn_dof_minlen + ssfx_001_mcm.ssfx_get_setting("wpn_dof", "fadelen", ssfx_weapons_dof_settings)
-	ssfx_far_blur(0, 0, false)
+	ssfx_far_blur(0, ssfx_inv_state, false)
 	ssfx_pda_state = 0
 	ssfx_pda_zoom = 0
 end
@@ -270,7 +262,7 @@ local function actor_on_update()
 		
 		if itm_state == 1 then -- Show PDA
 			ssfx_pda_state = 1
-			ssfx_set_dof(0, 0, 0, ssfx_wpn_dof_blur)
+			ssfx_far_blur(0, ssfx_inv_state, false)
 		elseif itm_state == 2 then -- Hide PDA
 			ssfx_PDA_reset()
 		end
