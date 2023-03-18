@@ -172,7 +172,7 @@ local function ssfx_PDA_state()
 		if ssfx_pda_zoom == 1 then 
 			ssfx_far_blur(ssfx_wpn_dof_pda_far_blur, 0, true)
 		else
-			ssfx_far_blur(0, ssfx_inv_state, false)
+			ssfx_far_blur(0, ssfx_inv_state, true)
 		end
 	end
 	
@@ -262,7 +262,7 @@ local function actor_on_update()
 		
 		if itm_state == 1 then -- Show PDA
 			ssfx_pda_state = 1
-			ssfx_far_blur(0, ssfx_inv_state, false)
+			ssfx_far_blur(0, ssfx_inv_state, true)
 		elseif itm_state == 2 then -- Hide PDA
 			ssfx_PDA_reset()
 		end
